@@ -35,6 +35,35 @@ function Build-GoBinary {
     }
 }
 
+function Build-ServerPlatforms {
+    param(
+        [string]$DistDir,
+        [string]$Ldflags = ""
+    )
+
+    New-Item -ItemType Directory -Force -Path $DistDir | Out-Null
+
+    $artifacts = @(
+        @{ Key = "windows_amd64"; GoOS = "windows"; GoArch = "amd64"; File = "kohiCrawlingServer.exe" },
+        @{ Key = "darwin_amd64";  GoOS = "darwin";  GoArch = "amd64"; File = "kohiCrawlingServer-darwin-amd64" },
+        @{ Key = "darwin_arm64";  GoOS = "darwin";  GoArch = "arm64"; File = "kohiCrawlingServer-darwin-arm64" }
+    )
+
+    $built = @{}
+    foreach ($item in $artifacts) {
+        $outPath = Join-Path $DistDir $item.File
+        Build-GoBinary -GoOS $item.GoOS -GoArch $item.GoArch -OutputPath $outPath -PackagePath "./cmd/server" -Ldflags $Ldflags
+        $built[$item.Key] = @{
+            Path = $outPath
+            File = $item.File
+            SHA256 = Get-FileHashLower $outPath
+        }
+    }
+
+    Reset-GoPlatformEnv
+    return $built
+}
+
 function Build-KohiPlatforms {
     param(
         [string]$DistDir,

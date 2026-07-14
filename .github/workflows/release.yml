@@ -33,7 +33,7 @@ jobs:
             echo "Repository name could not be resolved from GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >&2
             exit 1
           fi
-          UPDATE_URL="https://raw.githubusercontent.com/${OWNER}/${REPO}/main/update.json"
+          UPDATE_URL="https://raw.githubusercontent.com/${OWNER}/${REPO}/master/update.json"
           BASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}"
           echo "version=${TAG}" >> "$GITHUB_OUTPUT"
           echo "update_url=${UPDATE_URL}" >> "$GITHUB_OUTPUT"
@@ -44,19 +44,19 @@ jobs:
         run: |
           VERSION="${{ steps.meta.outputs.version }}"
           UPDATE_URL="${{ steps.meta.outputs.update_url }}"
-          LDFLAGS="-X kohiCrawling/kohi.Version=${VERSION} -X kohiCrawling/kohi.UpdateURL=${UPDATE_URL}"
+          LDFLAGS="-X kohiCrawling/server.Version=${VERSION} -X kohiCrawling/server.UpdateURL=${UPDATE_URL}"
           mkdir -p dist
 
           build_one() {
             local goos="$1"
             local goarch="$2"
             local output="$3"
-            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o "dist/${output}" ./cmd/kohi
+            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o "dist/${output}" ./cmd/server
           }
 
-          build_one windows amd64 kohiCrawling.exe
-          build_one darwin amd64 kohiCrawling-darwin-amd64
-          build_one darwin arm64 kohiCrawling-darwin-arm64
+          build_one windows amd64 kohiCrawlingServer.exe
+          build_one darwin amd64 kohiCrawlingServer-darwin-amd64
+          build_one darwin arm64 kohiCrawlingServer-darwin-arm64
 
       - name: Generate update.json
         shell: bash
@@ -76,9 +76,9 @@ jobs:
 
           base = "${{ steps.meta.outputs.base_url }}"
           files = {
-              "windows_amd64": "kohiCrawling.exe",
-              "darwin_amd64": "kohiCrawling-darwin-amd64",
-              "darwin_arm64": "kohiCrawling-darwin-arm64",
+              "windows_amd64": "kohiCrawlingServer.exe",
+              "darwin_amd64": "kohiCrawlingServer-darwin-amd64",
+              "darwin_arm64": "kohiCrawlingServer-darwin-arm64",
           }
           assets = {}
           for key, name in files.items():
@@ -103,21 +103,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/kohiCrawling.exe
-            dist/kohiCrawling-darwin-amd64
-            dist/kohiCrawling-darwin-arm64
+            dist/kohiCrawlingServer.exe
+            dist/kohiCrawlingServer-darwin-amd64
+            dist/kohiCrawlingServer-darwin-arm64
             dist/update.json
           generate_release_notes: true
 
-      - name: Commit update.json to main
+      - name: Commit update.json to master
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout main
-          git pull origin main
+          git fetch release master
+          git checkout master
+          git pull release master
           cp dist/update.json update.json
           git add update.json
           git diff --staged --quiet || git commit -m "chore: update manifest for ${{ github.ref_name }}"
-          git push origin main
+          git push release master

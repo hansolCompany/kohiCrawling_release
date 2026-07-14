@@ -33,13 +33,13 @@ if ($Version -match "^v") {
 }
 
 $tag = "v$Version"
-$updateURL = "https://raw.githubusercontent.com/$Owner/$Repo/main/update.json"
+$updateURL = "https://raw.githubusercontent.com/$Owner/$Repo/master/update.json"
 if ($updateURL -match "githubusercontent\.com/[^/]+//") {
     throw "Update URL 형식 오류: $updateURL (Owner/Repo 확인)"
 }
 $distDir = Join-Path $PSScriptRoot "dist"
 
-Write-Host "=== KohiCrawling Release ==="
+Write-Host "=== KohiCrawling Server Release ==="
 Write-Host "Version     : $Version"
 Write-Host "Repository  : $Owner/$Repo"
 Write-Host "Tag         : $tag"
@@ -47,12 +47,12 @@ Write-Host "Update URL  : $updateURL"
 Write-Host "Platforms   : windows/amd64, darwin/amd64, darwin/arm64"
 Write-Host ""
 
-$ldflags = "-X kohiCrawling/kohi.Version=$Version -X kohiCrawling/kohi.UpdateURL=$updateURL"
+$ldflags = "-X kohiCrawling/server.Version=$Version -X kohiCrawling/server.UpdateURL=$updateURL"
 
 Write-Host "빌드 중..."
 Push-Location $PSScriptRoot
 try {
-    $built = Build-KohiPlatforms -DistDir $distDir -Ldflags $ldflags
+    $built = Build-ServerPlatforms -DistDir $distDir -Ldflags $ldflags
 } finally {
     Pop-Location
 }
@@ -87,7 +87,7 @@ Write-Host "GitHub Release 생성 중..."
 $ghArgs = @(
     "release", "create", $tag,
     "--repo", "$Owner/$Repo",
-    "--title", "kohiCrawling $tag"
+    "--title", "kohiCrawlingServer $tag"
 )
 
 if ($Notes -ne "") {
@@ -114,7 +114,7 @@ Write-Host ""
 Write-Host "=== 배포 완료 ==="
 Write-Host "Release : https://github.com/$Owner/$Repo/releases/tag/$tag"
 Write-Host ""
-Write-Host "update.json 을 main 브랜치에 커밋/푸시하면 클라이언트가 자동 업데이트를 확인합니다."
+Write-Host "update.json 을 master 브랜치에 커밋/푸시하면 클라이언트가 자동 업데이트를 확인합니다."
 Write-Host "  git add update.json"
 Write-Host "  git commit -m ""chore: release $tag"""
-Write-Host "  git push origin main"
+Write-Host "  git push release master"

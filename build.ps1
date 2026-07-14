@@ -24,7 +24,7 @@ if (Test-Path $configPath) {
 function Get-DefaultUpdateURL([string]$name) {
     if ($UpdateURL -ne "") { return $UpdateURL }
     if ($Owner -ne "" -and $Repo -ne "") {
-        return "https://raw.githubusercontent.com/$Owner/$Repo/main/update.json"
+        return "https://raw.githubusercontent.com/$Owner/$Repo/master/update.json"
     }
     return "https://example.com/$name/update.json"
 }
@@ -79,8 +79,9 @@ try {
             }
         }
         "server" {
+            $serverLd = "-X kohiCrawling/server.Version=$Version -X kohiCrawling/server.UpdateURL=$(Get-DefaultUpdateURL 'kohiCrawlingServer')"
             if ($AllPlatforms) {
-                Build-AppPlatforms -Name "kohiCrawlingServer" -PackagePath "./cmd/server" -DistDir $distDir
+                Build-ServerPlatforms -DistDir $distDir -Ldflags $serverLd | Out-Null
             } else {
                 if ($IsWindows -or ($env:OS -match "Windows")) {
                     $output = "kohiCrawlingServer.exe"
@@ -88,7 +89,7 @@ try {
                     $output = "kohiCrawlingServer"
                 }
                 Write-Host "빌드: $output"
-                go build -o $output ./cmd/server
+                go build -ldflags $serverLd -o $output ./cmd/server
                 Write-Host "  완료: $output"
                 Write-Host ""
             }
@@ -97,16 +98,18 @@ try {
             if ($AllPlatforms) {
                 $kohiLd = "-X kohiCrawling/kohi.Version=$Version -X kohiCrawling/kohi.UpdateURL=$(Get-DefaultUpdateURL 'kohiCrawling')"
                 $longLd = "-X kohiCrawling/longterm.Version=$Version -X kohiCrawling/longterm.UpdateURL=$(Get-DefaultUpdateURL 'longtermCrawling')"
+                $serverLd = "-X kohiCrawling/server.Version=$Version -X kohiCrawling/server.UpdateURL=$(Get-DefaultUpdateURL 'kohiCrawlingServer')"
                 Build-KohiPlatforms -DistDir $distDir -Ldflags $kohiLd | Out-Null
                 Build-AppPlatforms -Name "longtermCrawling" -PackagePath "./cmd/longterm" -DistDir $distDir -Ldflags $longLd
-                Build-AppPlatforms -Name "kohiCrawlingServer" -PackagePath "./cmd/server" -DistDir $distDir
+                Build-ServerPlatforms -DistDir $distDir -Ldflags $serverLd | Out-Null
             } else {
                 Build-CurrentPlatform "kohiCrawling" "./cmd/kohi" "kohiCrawling/kohi.Version" "kohiCrawling/kohi.UpdateURL"
                 Build-CurrentPlatform "longtermCrawling" "./cmd/longterm" "kohiCrawling/longterm.Version" "kohiCrawling/longterm.UpdateURL"
+                $serverLd = "-X kohiCrawling/server.Version=$Version -X kohiCrawling/server.UpdateURL=$(Get-DefaultUpdateURL 'kohiCrawlingServer')"
                 if ($IsWindows -or ($env:OS -match "Windows")) {
-                    go build -o kohiCrawlingServer.exe ./cmd/server
+                    go build -ldflags $serverLd -o kohiCrawlingServer.exe ./cmd/server
                 } else {
-                    go build -o kohiCrawlingServer ./cmd/server
+                    go build -ldflags $serverLd -o kohiCrawlingServer ./cmd/server
                 }
             }
         }

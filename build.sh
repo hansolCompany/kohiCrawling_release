@@ -51,14 +51,16 @@ case "$TARGET" in
     fi
     ;;
   server)
+    local update_url="${UPDATE_URL:-https://example.com/kohiCrawlingServer/update.json}"
+    local ldflags="-X kohiCrawling/server.Version=${VERSION} -X kohiCrawling/server.UpdateURL=${update_url}"
     if [[ "${ALL_PLATFORMS:-}" == "1" ]]; then
       mkdir -p "$DIST"
-      GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o "${DIST}/kohiCrawlingServer.exe" ./cmd/server
-      GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o "${DIST}/kohiCrawlingServer-darwin-amd64" ./cmd/server
-      GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o "${DIST}/kohiCrawlingServer-darwin-arm64" ./cmd/server
+      GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "${ldflags}" -o "${DIST}/kohiCrawlingServer.exe" ./cmd/server
+      GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "${ldflags}" -o "${DIST}/kohiCrawlingServer-darwin-amd64" ./cmd/server
+      GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "${ldflags}" -o "${DIST}/kohiCrawlingServer-darwin-arm64" ./cmd/server
     else
       echo "빌드: kohiCrawlingServer"
-      go build -o kohiCrawlingServer ./cmd/server
+      go build -ldflags "${ldflags}" -o kohiCrawlingServer ./cmd/server
     fi
     ;;
   all)
