@@ -1,19 +1,19 @@
 {
-    "version":  "1.0.1",
-    "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.0.1/kohiCrawling.exe",
-    "sha256":  "48855fced9e513212931eb10f5e176bd1f0c1a1087bce6f43de594a9eb9bb4c5",
+    "version":  "1.1.0",
+    "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.1.0/kohiCrawlingServer.exe",
+    "sha256":  "469cb90485f9db0565ade47cf5fc550b22f1cb406cf1d20085082a41e7dab321",
     "assets":  {
                    "windows_amd64":  {
-                                         "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.0.1/kohiCrawling.exe",
-                                         "sha256":  "48855fced9e513212931eb10f5e176bd1f0c1a1087bce6f43de594a9eb9bb4c5"
+                                         "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.1.0/kohiCrawlingServer.exe",
+                                         "sha256":  "469cb90485f9db0565ade47cf5fc550b22f1cb406cf1d20085082a41e7dab321"
                                      },
                    "darwin_amd64":  {
-                                        "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.0.1/kohiCrawling-darwin-amd64",
-                                        "sha256":  "d9c9069f55294ebdea58348b18379076080fde677001323321885cb34cfdc382"
+                                        "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.1.0/kohiCrawlingServer-darwin-amd64",
+                                        "sha256":  "f98d473f4fe4e1db4dabbef2d1781d37404b8cfdd114da9c1c5a9bdfbe0b1360"
                                     },
                    "darwin_arm64":  {
-                                        "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.0.1/kohiCrawling-darwin-arm64",
-                                        "sha256":  "123cc61043a22e5c55ad32793c580139a2f3ea9efb864f15abdadcf46b1e2b97"
+                                        "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.1.0/kohiCrawlingServer-darwin-arm64",
+                                        "sha256":  "68710fec9c0e1be6387cbe3df261bd5b3ff3e4b40dc261b0a54e3b821e09839b"
                                     }
                }
 }
