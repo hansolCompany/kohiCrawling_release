@@ -1,0 +1,123 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Resolve version
+        id: meta
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          OWNER="${GITHUB_REPOSITORY_OWNER}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          if [ -z "$REPO" ]; then
+            echo "Repository name could not be resolved from GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >&2
+            exit 1
+          fi
+          UPDATE_URL="https://raw.githubusercontent.com/${OWNER}/${REPO}/main/update.json"
+          BASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}"
+          echo "version=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "update_url=${UPDATE_URL}" >> "$GITHUB_OUTPUT"
+          echo "base_url=${BASE_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Build all platforms
+        shell: bash
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          UPDATE_URL="${{ steps.meta.outputs.update_url }}"
+          LDFLAGS="-X kohiCrawling/kohi.Version=${VERSION} -X kohiCrawling/kohi.UpdateURL=${UPDATE_URL}"
+          mkdir -p dist
+
+          build_one() {
+            local goos="$1"
+            local goarch="$2"
+            local output="$3"
+            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o "dist/${output}" ./cmd/kohi
+          }
+
+          build_one windows amd64 kohiCrawling.exe
+          build_one darwin amd64 kohiCrawling-darwin-amd64
+          build_one darwin arm64 kohiCrawling-darwin-arm64
+
+      - name: Generate update.json
+        shell: bash
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          BASE_URL="${{ steps.meta.outputs.base_url }}"
+
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+
+          def sha256(path):
+              h = hashlib.sha256()
+              with open(path, "rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          base = "${{ steps.meta.outputs.base_url }}"
+          files = {
+              "windows_amd64": "kohiCrawling.exe",
+              "darwin_amd64": "kohiCrawling-darwin-amd64",
+              "darwin_arm64": "kohiCrawling-darwin-arm64",
+          }
+          assets = {}
+          for key, name in files.items():
+              path = pathlib.Path("dist") / name
+              assets[key] = {
+                  "download_url": f"{base}/{name}",
+                  "sha256": sha256(path),
+              }
+
+          manifest = {
+              "version": "${{ steps.meta.outputs.version }}",
+              "download_url": assets["windows_amd64"]["download_url"],
+              "sha256": assets["windows_amd64"]["sha256"],
+              "assets": assets,
+          }
+          text = json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
+          pathlib.Path("dist/update.json").write_text(text, encoding="utf-8")
+          pathlib.Path("update.json").write_text(text, encoding="utf-8")
+          PY
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/kohiCrawling.exe
+            dist/kohiCrawling-darwin-amd64
+            dist/kohiCrawling-darwin-arm64
+            dist/update.json
+          generate_release_notes: true
+
+      - name: Commit update.json to main
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          cp dist/update.json update.json
+          git add update.json
+          git diff --staged --quiet || git commit -m "chore: update manifest for ${{ github.ref_name }}"
+          git push origin main

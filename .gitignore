@@ -1,0 +1,56 @@
+# 바이너리
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 로컬 빌드 산출물 (프로젝트 루트)
+/kohiCrawling
+/kohiCrawling-darwin-amd64
+/kohiCrawling-darwin-arm64
+/longtermCrawling
+/longtermCrawling-darwin-amd64
+/longtermCrawling-darwin-arm64
+/kohiCrawlingServer
+/kohiCrawlingServer-darwin-amd64
+/kohiCrawlingServer-darwin-arm64
+
+# 테스트/빌드 산출물
+*.test
+*.out
+/bin/
+/dist/
+
+# Go
+vendor/
+coverage.out
+*.coverprofile
+__debug_bin
+
+# 배포/로컬 설정 (GitHub Owner 등)
+/release.config.ps1
+
+# 환경 변수 (민감 정보)
+.env
+.env.*
+!.env.example
+
+# IDE / 에디터
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# 임시/백업
+*.tmp
+*.temp
+*.bak
+*.log

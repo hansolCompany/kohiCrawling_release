@@ -1,0 +1,19 @@
+{
+    "version":  "1.0.6",
+    "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.0.6/kohiCrawling.exe",
+    "sha256":  "9a57e63992b544bd152444c5940ee7728ec7e65810275fc7d21f0681f0a798aa",
+    "assets":  {
+                   "windows_amd64":  {
+                                         "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.0.6/kohiCrawling.exe",
+                                         "sha256":  "9a57e63992b544bd152444c5940ee7728ec7e65810275fc7d21f0681f0a798aa"
+                                     },
+                   "darwin_amd64":  {
+                                        "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.0.6/kohiCrawling-darwin-amd64",
+                                        "sha256":  "be56585af78ba2db448977b3cb5644e34a01669d00ffda5e1a8eb641efd8598c"
+                                    },
+                   "darwin_arm64":  {
+                                        "download_url":  "https://github.com/hansolCompany/kohiCrawling_release/releases/download/v1.0.6/kohiCrawling-darwin-arm64",
+                                        "sha256":  "ccee5f8f27ca9dfe1f03e8904ae4a64ede512cabe74e308e4fb7eea51bea83d5"
+                                    }
+               }
+}
